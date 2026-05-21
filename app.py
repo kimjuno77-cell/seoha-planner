@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import datetime
 import calendar
@@ -280,5 +279,3 @@ st.markdown(f"""
     <p style="margin-top: 10px; font-size: 16px; font-weight: bold;">"{today_letter}"</p>
 </div>
 """, unsafe_allow_html=True)
-
-```
