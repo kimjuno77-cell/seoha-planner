@@ -5,44 +5,39 @@ import json
 import os
 
 calendar.setfirstweekday(6)
-st.set_page_config(page_title="서하의 플래너", page_icon="🤍", layout="centered")
+st.set_page_config(page_title="서하의 갓생 플래너", page_icon="🤍", layout="centered")
 
 st.markdown("""
 <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
     
-    html, body, [class*="css"], .stApp {
-        font-family: 'Pretendard', -apple-system, sans-serif !important;
-        background-color: #FDFBF7 !important;
+    .stApp { background-color: #F5F5F7 !important; }
+    
+    /* 버튼 스타일 복원: 검정색 버튼 방지 */
+    div.stButton > button {
+        background-color: #FFFFFF !important;
+        border: 1px solid #E5E5EA !important;
+        color: #1D1D1F !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
     }
     
-    /* 버튼의 검정색 제거 및 깔끔한 테두리 */
-    button {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E2E8F0 !important;
-        color: #334155 !important;
-        border-radius: 8px !important;
-    }
-
-    /* 🚨 세로보기에서 날짜 칸이 넓어지는 현상 방지: 비율 고정 */
+    /* 🚨 캘린더 가로세로 비율 최적화 */
     [data-testid="column"] {
         flex: 1 1 14% !important;
-        max-width: 14% !important;
         padding: 2px !important;
     }
     
-    /* 날짜 버튼 디자인 */
-    div.stButton > button {
-        width: 100% !important;
-        aspect-ratio: 1/1 !important; /* 가로세로 비율 1:1 강제 */
-        padding: 0px !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        white-space: pre-line !important;
+    .tip-box { 
+        background: #FFFFFF; 
+        padding: 20px; 
+        border-radius: 20px; 
+        margin: 15px 0; 
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+        border-left: 5px solid #FF2D55;
     }
-
-    .apple-title { color: #1D1D1F !important; text-align: center; font-weight: 800 !important; font-size: 1.5rem !important; }
-    .tip-box { background: #E6F4FF; padding: 15px; border-radius: 12px; margin: 15px 0; border-left: 5px solid #007AFF; }
+    
+    .apple-title { color: #1D1D1F !important; text-align: center; font-weight: 800 !important; font-size: 1.8rem !important; margin: 20px 0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -58,27 +53,32 @@ def save_data(data):
 
 if 'planner_data' not in st.session_state: st.session_state.planner_data = load_data()
 
-st.markdown("<div class='apple-title'>✨ 서하의 스마트 플래너 ✨</div>", unsafe_allow_html=True)
+st.markdown("<div class='apple-title'>서하의 스마트 플래너</div>", unsafe_allow_html=True)
 
-# 언니의 꿀팁 복원
+# 복원된 언니의 꿀팁
 st.markdown("""
 <div class='tip-box'>
-    <b>💡 언니의 공부 꿀팁:</b><br>
-    "서하야, 모르는 문제랑 씨름할 땐 <b>타이머를 10분만</b> 맞춰봐! 
-    시간이 지나도 안 풀리면 바로 해설지를 보되, <b>'왜 이렇게 생각 못 했지?'</b>라는 
-    핵심 문장만 딱 한 줄 적어두면 그게 진짜 네 실력이 돼! 오늘도 화이팅!"
+    <b>👩‍🏫 언니의 공부 꿀팁:</b><br>
+    "서하야, 오늘 공부가 잘 안돼? 그럴 땐 <b>딱 10분만</b> 타이머 재고 
+    가장 쉬운 문제 하나만 풀고 시작해봐! 뇌가 공부 모드로 바뀌는 데 
+    필요한 마법의 시간이래. 오늘도 넌 잘 해낼 거야! 화이팅! 💖"
 </div>
 """, unsafe_allow_html=True)
 
-# 달력 출력 (비율 유지)
+# 월 네비게이션
+nav_cols = st.columns([1, 2, 1])
+with nav_cols[1]:
+    st.markdown(f"<h3 style='text-align:center;'>{datetime.date.today().year}. {datetime.date.today().month:02d}</h3>", unsafe_allow_html=True)
+
+# 캘린더 출력
 cal = calendar.monthcalendar(datetime.date.today().year, datetime.date.today().month)
 for week in cal:
     cols = st.columns(7)
     for i, day in enumerate(week):
         if day != 0:
-            cols[i].button(f"{day}\n·")
+            cols[i].button(f"{day}")
         else:
             cols[i].write("")
 
 st.write("---")
-st.info("이제 아이폰 세로 화면에서도 달력이 예쁘게 정렬됩니다!")
+st.success("디자인과 모든 기능이 복원되었습니다.")
