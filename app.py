@@ -10,7 +10,7 @@ calendar.setfirstweekday(6)
 # 페이지 기본 설정
 st.set_page_config(page_title="서하의 갓생 플래너", page_icon="💖", layout="centered")
 
-# 💡 아이폰/아이패드 완벽 호환 프리미엄 Y2K 하이틴 CSS
+# 💡 아이폰/아이패드 완벽 호환 프리미엄 Y2K 하이틴 CSS (정사각형 타일 및 원형 스티커 완벽 고정)
 st.markdown("""
 <style>
     /* Pretendard 고급 웹폰트 강제 적용 */
@@ -59,58 +59,58 @@ st.markdown("""
         border-bottom: 2px solid #FFE4E8;
     }
 
-    /* 🚨 캘린더 강제 가로 정렬 및 정사각형 고정 마법 🚨 */
-    .calendar-wrapper div[data-testid="stHorizontalBlock"] {
+    /* 🚨 7열짜리 달력 전용 스타일 (정사각형 타일 강제 고정 및 찌그러짐 원천 차단) 🚨 */
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        align-items: stretch !important;
+        align-items: flex-start !important; /* 높이가 한쪽으로 길어지는 것 완벽 방지 */
         width: 100% !important;
         gap: 6px !important;
         margin-bottom: 6px !important;
     }
-    .calendar-wrapper div[data-testid="column"] {
+    
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) div[data-testid="column"] {
         width: calc(100% / 7) !important;
         min-width: 0 !important;
         flex: 1 1 0% !important;
         padding: 0 !important;
     }
 
-    /* 🗓️ 캘린더 타일 버튼 디자인 (정사각형 고정) */
-    .calendar-wrapper div[data-testid="stButton"] > button {
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) div[data-testid="stButton"] > button {
         width: 100% !important;
-        aspect-ratio: 1 / 1 !important; /* 가로세로 1:1 완벽한 정사각형 유지! */
-        height: auto !important;
+        aspect-ratio: 1 / 1 !important; /* 정사각형 고정 */
         border-radius: 14px !important;
         border: 1.5px solid #FFD1D8 !important;
         background-color: #ffffff !important;
         color: #5E5A70 !important;
         font-weight: 700 !important;
-        font-size: 11px !important; /* 모바일에서 글자 안 잘리게 조정 */
+        font-size: 11px !important;
         line-height: 1.25 !important;
-        white-space: pre-wrap !important;
+        white-space: pre-line !important; /* 줄바꿈 허용 */
+        word-break: keep-all !important; /* 글자가 하나씩 깨져 줄바꿈되는 현상 방지 */
         padding: 4px 1px !important;
         box-shadow: 0px 4px 10px rgba(255, 107, 139, 0.03) !important;
         display: flex !important;
         flex-direction: column !important;
-        justify-content: space-between !important;
+        justify-content: center !important;
         align-items: center !important;
     }
     
-    .calendar-wrapper div[data-testid="stButton"] > button:hover {
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) div[data-testid="stButton"] > button:hover {
         border-color: #FF6B8B !important;
         background-color: #FFF2F4 !important;
         transform: translateY(-2px);
     }
 
     /* ✨ '오늘' 날짜 하이라이트 타일 */
-    .calendar-wrapper div[data-testid="stButton"] > button[kind="primary"] {
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) div[data-testid="stButton"] > button[kind="primary"] {
         background: linear-gradient(135deg, #FF8E9E 0%, #FF5A79 100%) !important;
         color: white !important;
         border: none !important;
         box-shadow: 0px 6px 15px rgba(255, 90, 121, 0.35) !important;
     }
-    .calendar-wrapper div[data-testid="stButton"] > button[kind="primary"] * {
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) div[data-testid="stButton"] > button[kind="primary"] * {
         color: white !important;
     }
 
@@ -124,24 +124,50 @@ st.markdown("""
         opacity: 0.4;
     }
 
-    /* 둥글동글 진짜 원형 스티커 버튼 */
-    .sticker-box-wrapper div[data-testid="stHorizontalBlock"] {
+    /* 📱 모바일 화면 비율 맞춤 고정 (11.5vw를 사용하여 완벽한 정사각형 보장) */
+    @media (max-width: 768px) {
+        div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) div[data-testid="stButton"] > button {
+            height: 11.5vw !important;
+            font-size: 8px !important;
+            padding: 2px 0px !important;
+        }
+        .calendar-empty {
+            height: 11.5vw !important;
+        }
+    }
+    @media (min-width: 769px) {
+        div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(7)) div[data-testid="stButton"] > button {
+            height: 85px !important;
+            font-size: 12px !important;
+        }
+        .calendar-empty {
+            height: 85px !important;
+        }
+    }
+
+    /* 🎀 6열짜리 스티커 선택 줄 전용 스타일 (완벽한 동그라미) */
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(6)):not(:has(> div[data-testid="column"]:nth-child(7))) {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        gap: 6px !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
     }
-    .sticker-box-wrapper div[data-testid="column"] {
-        width: calc(100% / 7) !important;
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(6)):not(:has(> div[data-testid="column"]:nth-child(7))) div[data-testid="column"] {
+        width: calc(100% / 6) !important;
         flex: 1 1 0% !important;
         min-width: 0 !important;
     }
-    .sticker-box-wrapper button {
-        width: 44px !important;
-        height: 44px !important;
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(6)):not(:has(> div[data-testid="column"]:nth-child(7))) div[data-testid="stButton"] > button {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
         border-radius: 50% !important; /* 완벽한 동그라미 스티커 */
         border: 2px dashed #FFD1D8 !important;
         background-color: #ffffff !important;
@@ -154,7 +180,7 @@ st.markdown("""
         box-shadow: 0px 4px 8px rgba(255, 107, 139, 0.05) !important;
         transition: all 0.2s ease-in-out !important;
     }
-    .sticker-box-wrapper button:hover {
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(6)):not(:has(> div[data-testid="column"]:nth-child(7))) div[data-testid="stButton"] > button:hover {
         border-style: solid !important;
         border-color: #FF6B8B !important;
         background-color: #FFF2F4 !important;
@@ -286,7 +312,7 @@ if 'selected_day' not in st.session_state:
 def get_month_key(year, month):
     return f"{year}_{month}"
 
-# 💡 기본 일정이 항상 채워져 있도록 보장하는 로직 (기록이 없을 때 자동 생성)
+# 💡 기본 일정이 항상 채워져 있도록 보장하는 로직 (기록이 없을 때 자동 생성 및 무한 로드 방지)
 def get_day_data(year, month, day):
     month_key = get_month_key(year, month)
     day_str = str(day)
@@ -294,11 +320,16 @@ def get_day_data(year, month, day):
     if month_key not in st.session_state.planner_data:
         st.session_state.planner_data[month_key] = {}
         
-    if day_str not in st.session_state.planner_data[month_key] or not st.session_state.planner_data[month_key][day_str].get("tasks"):
+    if day_str not in st.session_state.planner_data[month_key] or "tasks" not in st.session_state.planner_data[month_key][day_str]:
         st.session_state.planner_data[month_key][day_str] = {
             "tasks": get_default_tasks(year, month, day),
-            "sticker": st.session_state.planner_data[month_key].get(day_str, {}).get("sticker", "")
+            "sticker": "",
+            "initialized": True
         }
+    elif not st.session_state.planner_data[month_key][day_str].get("tasks") and not st.session_state.planner_data[month_key][day_str].get("initialized"):
+        st.session_state.planner_data[month_key][day_str]["tasks"] = get_default_tasks(year, month, day)
+        st.session_state.planner_data[month_key][day_str]["initialized"] = True
+        
     return st.session_state.planner_data[month_key][day_str]
 
 def update_day_data(year, month, day, new_data):
@@ -331,7 +362,7 @@ daily_letters = [
     "오늘따라 집중이 안 된다면 장소를 조금 바꿔보는 건 어때? 카페나 도서관도 좋아. ☕",
     "포기하고 싶은 순간이 온다면, 왜 이 일을 시작했는지 처음의 마음을 떠올려 봐. 🔙",
     "건강이 최우선이야! 밥 잘 챙겨 먹고, 틈틈이 스트레칭하는 거 잊지 마. 🍎",
-    "서하야, 넌 생각보다 훨씬 강하고 똑똑한 사람이야. 네 안의 거인 깨워봐! 🦸‍♀️",
+    "서하야, 넌 생각보다 훨씬 강하고 똑똑한 사람이야. 네 안의 거인을 깨워봐! 🦸‍♀️",
     "모든 걸 다 잘할 필요는 없어. 네가 잘하는 것, 좋아하는 것에 집중해도 괜찮아. 🎯",
     "오늘의 작은 노력이 내일의 큰 기적을 만들 거야. 매일매일 조금씩 성장하는 서하를 응원해! 🌱",
     "가끔은 친구들과 수다 떨면서 스트레스 푸는 시간도 꼭 필요해. 즐거운 시간 보내! 👯‍♀️",
@@ -417,18 +448,18 @@ with tab1:
                     # 요일별 수국/영탐/힐링 미션 요약 (달력 일정 빈칸 보완)
                     wd_temp = datetime.date(st.session_state.view_year, st.session_state.view_month, day).weekday()
                     if wd_temp == 0:
-                        day_badge = "🍯힐링"
+                        day_badge = "🍯"
                     elif wd_temp in [1, 3, 5]:
-                        day_badge = "📐수·국"
+                        day_badge = "📐"
                     else:
-                        day_badge = "🇺🇸영·탐"
+                        day_badge = "🇺🇸"
                     
                     if is_real_today:
-                        label = f"👑오늘\n{day}일 | {sticker if sticker else '✨'}\n{day_badge}\n{prog_str}"
+                        label = f"👑 오늘\n{day}일\n{sticker if sticker else '✨'}\n{day_badge}  {prog_str}"
                         btn_type = "primary"
                     else:
                         marker = "📍" if day == st.session_state.selected_day else ""
-                        label = f"{marker} {day}일 | {sticker}\n{day_badge}\n{prog_str}"
+                        label = f"{marker} {day}일\n{sticker if sticker else 'ㅤ'}\n{day_badge}  {prog_str}"
                         btn_type = "secondary"
                     
                     if cols[i].button(label, key=f"day_{day}", type=btn_type, use_container_width=True):
@@ -509,24 +540,23 @@ with tab1:
         
         st.write("---")
 
-        # 스티커 꾸미기 (둥근 원형 스티커)
+        # 스티커 꾸미기 (6열 동글동글 원형 스티커)
         st.markdown("<p style='font-weight: 800; color: #5E5A70 !important; margin-bottom: 12px;'>🎀 서하의 오늘 감성 스티커</p>", unsafe_allow_html=True)
         
-        st.markdown('<div class="sticker-box-wrapper">', unsafe_allow_html=True)
-        emoji_cols = st.columns(7)
-        emojis = ['🌸', '🔥', '🔋', '🫠', '👑', '💖', '🧹']
+        emoji_cols = st.columns(6)
+        emojis = ['🌸', '🔥', '🔋', '🫠', '👑', '💖']
         for i, emoji in enumerate(emojis):
-            if emoji == '🧹':
-                if emoji_cols[i].button("🧹", key="clear_sticker_v2", help="스티커 지우기"):
-                    day_data['sticker'] = ""
-                    update_day_data(s_year, s_month, s_day, day_data)
-                    st.rerun()
-            else:
-                if emoji_cols[i].button(emoji, key=f"emoji_btn_{s_day}_{emoji}"):
-                    day_data['sticker'] = emoji
-                    update_day_data(s_year, s_month, s_day, day_data)
-                    st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+            if emoji_cols[i].button(emoji, key=f"emoji_btn_{s_day}_{emoji}"):
+                day_data['sticker'] = emoji
+                update_day_data(s_year, s_month, s_day, day_data)
+                st.rerun()
+        
+        if day_data.get("sticker"):
+            st.write("")
+            if st.button("🧹 오늘 붙인 스티커 떼기", use_container_width=True):
+                day_data['sticker'] = ""
+                update_day_data(s_year, s_month, s_day, day_data)
+                st.rerun()
 
 with tab2:
     st.markdown("<h3 style='margin-bottom: 20px; font-size: 1.3rem; color: #FF6B8B !important;'>👩‍🏫 명문대 선배의 팩트폭격</h3>", unsafe_allow_html=True)
