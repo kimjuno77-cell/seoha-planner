@@ -4,25 +4,17 @@ import calendar
 import json
 import os
 
-# 💡 달력 시작을 '일요일'로 강제 설정 (손글씨 플래너와 동일하게!)
-calendar.setfirstweekday(calendar.SUNDAY)
+# 💡 달력 시작을 '일요일'로 강제 설정
+calendar.setfirstweekday(6)
 
 st.set_page_config(page_title="서하의 갓생 플래너", page_icon="💖", layout="wide")
 
-# 💡 다크모드 충돌 방지 및 예쁜 UI를 위한 강력한 CSS
+# 💡 다크모드 방지 및 예쁜 UI CSS
 st.markdown("""
 <style>
-    /* 전체 배경을 밝은 톤으로 고정 */
-    .stApp, .main {
-        background-color: #FDFBF7 !important;
-    }
+    .stApp, .main { background-color: #FDFBF7 !important; }
+    h1, h2, h3, p, span, div, label { color: #334155 !important; }
     
-    /* 모든 텍스트 색상을 어두운 회색으로 고정 (하얗게 날아가는 현상 방지) */
-    h1, h2, h3, h4, p, span, div, label {
-        color: #334155 !important;
-    }
-    
-    /* 제목 전용 핑크색 */
     .pink-title {
         color: #db2777 !important;
         text-align: center;
@@ -30,25 +22,47 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* 달력 버튼 스타일 업그레이드 */
-    div.stButton > button {
-        background-color: #ffffff !important;
-        border: 2px solid #fce7f3 !important;
-        border-radius: 12px !important;
-        color: #db2777 !important;
-        font-weight: 800 !important;
-        height: 60px !important; /* 버튼 크기 키움 */
-        width: 100% !important;
-        transition: all 0.2s;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    .weekday-header {
+        text-align: center;
+        font-weight: 900;
+        font-size: 1.2rem;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #fce7f3;
+        margin-bottom: 10px;
     }
-    div.stButton > button:hover {
-        border-color: #f472b6 !important;
-        background-color: #fdf2f8 !important;
-        transform: scale(1.02);
+
+    div[data-testid="stButton"] > button {
+        height: 100px !important;
+        width: 100% !important;
+        border-radius: 16px !important;
+        border: 2px solid #fce7f3 !important;
+        background-color: #ffffff !important;
+        color: #475569 !important;
+        font-weight: 800 !important;
+        font-size: 14px !important;
+        white-space: pre-wrap !important;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.02) !important;
+        transition: all 0.2s ease-in-out !important;
     }
     
-    /* 입력창(텍스트 인풋) 다크모드 방지 */
+    div[data-testid="stButton"] > button:hover {
+        border-color: #f472b6 !important;
+        background-color: #fdf2f8 !important;
+        transform: translateY(-2px);
+    }
+
+    /* ✨ '오늘' 날짜 강조 ✨ */
+    div[data-testid="stButton"] > button[kind="primary"] {
+        background: linear-gradient(135deg, #f472b6, #db2777) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0px 6px 15px rgba(219, 39, 119, 0.4) !important;
+        transform: scale(1.05);
+    }
+    div[data-testid="stButton"] > button[kind="primary"] * {
+        color: white !important;
+    }
+
     .stTextInput > div > div > input {
         background-color: #ffffff !important;
         color: #334155 !important;
@@ -56,19 +70,45 @@ st.markdown("""
         border-radius: 10px !important;
     }
     
-    /* 편지 박스 */
     .letter-box {
         background: linear-gradient(135deg, #4c1d95, #312e81);
         padding: 25px;
         border-radius: 20px;
         margin-top: 40px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
-    .letter-box p, .letter-box span {
-        color: white !important;
-    }
+    .letter-box p, .letter-box span { color: white !important; }
 </style>
 """, unsafe_allow_html=True)
+
+# --- 💡 요일별 기본 미션 자동 생성기 ---
+def get_default_tasks(year, month, day):
+    wd = datetime.date(year, month, day).weekday() # 0:월 ~ 6:일
+    if wd == 0: # 월요일
+        return [
+            {"id": 1, "text": "영어/수학 학원 및 학교 숙제 깔끔하게 클리어하기 🎒", "done": False},
+            {"id": 2, "text": "오늘 1시간 완전 휴식 (넷플릭스/아이돌 영상 허용! 🎁)", "done": False}
+        ]
+    elif wd in [1, 3, 5]: # 화, 목, 토
+        if wd == 1:
+            return [{"id": 1, "text": "수학 취약 단원 개념 인강 1개 보고 바로 예제 풀기 📐", "done": False},
+                    {"id": 2, "text": "국어 문학 시어의 의미 대조 비교 분석하기 🌸", "done": False}]
+        elif wd == 3:
+            return [{"id": 1, "text": "수학 취약 유형 10문제 풀기 (시간 타이머 재기) ⏱️", "done": False},
+                    {"id": 2, "text": "국어 비문학 구조도 그리며 읽는 연습 ✍️", "done": False}]
+        else:
+            return [{"id": 1, "text": "수학 이번 주 오답 선별해서 한 번 더 완전 정복 🔥", "done": False},
+                    {"id": 2, "text": "국어 문법/고전시가 취약 파트 개념 정리 📚", "done": False}]
+    else: # 수, 금, 일
+        if wd == 2:
+            return [{"id": 1, "text": "영어 모의고사 오답노트 (오답 선택지 매력 분석) 🇺🇸", "done": False},
+                    {"id": 2, "text": "탐구 과목 흐름 연표/목차에 키워드 가리고 채우기 🧪", "done": False}]
+        elif wd == 4:
+            return [{"id": 1, "text": "영어 단어 누적 100개 셀프 테스트 해보기 💯", "done": False},
+                    {"id": 2, "text": "탐구 기출문제 풀고 틀린 선지 개념서에 밑줄 치기 ✍️", "done": False}]
+        else:
+            return [{"id": 1, "text": "영어 지문 통째로 보면서 주제 한 문장으로 요약하기 📝", "done": False},
+                    {"id": 2, "text": "한 주간 정리한 나만의 단어/오답 수첩 정독하기 📖", "done": False}]
 
 # --- 데이터 관리 로직 ---
 DATA_FILE = "planner_data.json"
@@ -86,14 +126,14 @@ def save_data(data):
 if 'planner_data' not in st.session_state:
     st.session_state.planner_data = load_data()
 
-today = datetime.date.today()
+real_today = datetime.date.today()
 
 if 'view_year' not in st.session_state:
-    st.session_state.view_year = today.year
+    st.session_state.view_year = real_today.year
 if 'view_month' not in st.session_state:
-    st.session_state.view_month = today.month
+    st.session_state.view_month = real_today.month
 if 'selected_day' not in st.session_state:
-    st.session_state.selected_day = today.day
+    st.session_state.selected_day = real_today.day
 
 def get_month_key(year, month):
     return f"{year}_{month}"
@@ -101,10 +141,16 @@ def get_month_key(year, month):
 def get_day_data(year, month, day):
     month_key = get_month_key(year, month)
     day_str = str(day)
+    
     if month_key not in st.session_state.planner_data:
         st.session_state.planner_data[month_key] = {}
+        
+    # 💡 해당 날짜의 기록이 아예 없다면 '기본 미션'을 셋팅해 줌
     if day_str not in st.session_state.planner_data[month_key]:
-        st.session_state.planner_data[month_key][day_str] = {"tasks": [], "sticker": ""}
+        st.session_state.planner_data[month_key][day_str] = {
+            "tasks": get_default_tasks(year, month, day),
+            "sticker": ""
+        }
     return st.session_state.planner_data[month_key][day_str]
 
 def update_day_data(year, month, day, new_data):
@@ -113,6 +159,7 @@ def update_day_data(year, month, day, new_data):
     st.session_state.planner_data[month_key][day_str] = new_data
     save_data(st.session_state.planner_data)
 
+# 💡 매일 자동으로 업데이트 되는 편지
 daily_letters = [
     "서하야, 이번 달의 첫날이야! 새로운 마음으로 기분 좋게 시작해 보자. 넌 충분히 해낼 수 있어! 💖",
     "오늘 하루도 수고 많았어. 계획대로 안 된 날도 있겠지만, 책상에 앉은 것만으로도 대단해! 🌟",
@@ -146,9 +193,9 @@ daily_letters = [
     "이번 달도 거의 끝나가네. 마지막까지 유종의 미를 거둘 수 있도록 조금만 더 힘내자! 🔥",
     "한 달 동안 정말 고생 많았어, 서하야! 네가 자랑스러워. 맛있는 거 먹고 푹 쉬어! 🍰"
 ]
-today_letter = daily_letters[(today.day - 1) % len(daily_letters)]
+today_letter = daily_letters[(real_today.day - 1) % len(daily_letters)]
 
-# --- 헤더 ---
+# --- 상단 타이틀 및 월 이동 ---
 st.markdown("<h1 class='pink-title'>✨ 서하의 스마트 효율 메이커 ✨</h1>", unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns([1, 2, 3, 2, 1])
@@ -178,94 +225,119 @@ st.write("---")
 tab1, tab2 = st.tabs(["📅 다이어리 꾸미기", "✨ 언니의 팩폭 꿀팁"])
 
 with tab1:
-    st.markdown("### 🗓️ 이달의 스케줄러")
+    col_cal, col_tasks = st.columns([4, 3])
     
-    # 💡 일요일부터 시작하도록 헤더 변경
-    cols = st.columns(7)
-    weekdays = ["일", "월", "화", "수", "목", "금", "토"]
-    for i, wd in enumerate(weekdays):
-        color = "#ef4444" if i == 0 else "#3b82f6" if i == 6 else "#64748b"
-        cols[i].markdown(f"<div style='text-align: center; color: {color}; font-weight: 800;'>{wd}</div>", unsafe_allow_html=True)
+    # [왼쪽] 달력 영역
+    with col_cal:
+        st.markdown("### 🗓️ 이달의 스케줄러")
         
-    cal = calendar.monthcalendar(st.session_state.view_year, st.session_state.view_month)
-    for week in cal:
         cols = st.columns(7)
-        for i, day in enumerate(week):
-            if day != 0:
-                day_data = get_day_data(st.session_state.view_year, st.session_state.view_month, day)
-                sticker = day_data.get("sticker", "")
-                
-                tasks = day_data.get("tasks", [])
-                total_t = len(tasks)
-                done_t = sum(1 for t in tasks if t["done"])
-                prog_str = f"({done_t}/{total_t})" if total_t > 0 else ""
-                
-                marker = "📍 " if day == st.session_state.selected_day else ""
-                label = f"{marker}{day}\n{sticker} {prog_str}"
-                
-                if cols[i].button(label, key=f"day_{day}"):
-                    st.session_state.selected_day = day
-                    st.rerun()
-
-    st.write("---")
-    
-    # 미션 영역
-    s_year = st.session_state.view_year
-    s_month = st.session_state.view_month
-    s_day = st.session_state.selected_day
-    day_date = datetime.date(s_year, s_month, s_day)
-    wd_idx = day_date.weekday() # 월(0) ~ 일(6)
-    
-    day_type = "🇺🇸 영어+탐구 찢기"
-    if wd_idx == 0: day_type = "🍯 서하의 힐링 먼데이"
-    elif wd_idx in [1, 3, 5]: day_type = "📐 수학+국어 깊이파기"
-    
-    st.markdown(f"<h3 style='color:#db2777;'>💖 {s_day}일 미션: {day_type}</h3>", unsafe_allow_html=True)
-    
-    day_data = get_day_data(s_year, s_month, s_day)
-    tasks = day_data.get("tasks", [])
-    
-    if not tasks:
-        st.info("오늘 등록된 미션이 없어! 아래에서 추가해 봐 ✏️")
-    else:
-        for idx, task in enumerate(tasks):
-            col_cb, col_del = st.columns([5, 1])
-            with col_cb:
-                new_status = st.checkbox(task['text'], value=task['done'], key=f"task_{s_month}_{s_day}_{idx}")
-                if new_status != task['done']:
-                    day_data['tasks'][idx]['done'] = new_status
-                    update_day_data(s_year, s_month, s_day, day_data)
-                    st.rerun()
-            with col_del:
-                if st.button("🗑️", key=f"del_{s_month}_{s_day}_{idx}"):
-                    day_data['tasks'].pop(idx)
-                    update_day_data(s_year, s_month, s_day, day_data)
-                    st.rerun()
-                    
-    with st.form(key=f"add_task_form_{s_day}", clear_on_submit=True):
-        new_task_text = st.text_input("새로운 미션 추가...")
-        submitted = st.form_submit_button("➕ 추가하기")
-        if submitted and new_task_text.strip():
-            new_task = {"id": len(tasks)+1, "text": new_task_text.strip(), "done": False}
-            day_data['tasks'].append(new_task)
-            update_day_data(s_year, s_month, s_day, day_data)
-            st.rerun()
-
-    st.markdown("---")
-    st.markdown("**🎀 오늘 기분 스티커**")
-    emoji_cols = st.columns(6)
-    emojis = ['🌸', '🔥', '🔋', '🫠', '👑', '💖']
-    for i, emoji in enumerate(emojis):
-        if emoji_cols[i].button(emoji, key=f"emoji_{emoji}"):
-            day_data['sticker'] = emoji
-            update_day_data(s_year, s_month, s_day, day_data)
-            st.rerun()
+        weekdays = ["일", "월", "화", "수", "목", "금", "토"]
+        for i, wd in enumerate(weekdays):
+            color = "#ef4444" if i == 0 else "#3b82f6" if i == 6 else "#64748b"
+            cols[i].markdown(f"<div class='weekday-header' style='color: {color};'>{wd}</div>", unsafe_allow_html=True)
             
-    if day_data.get("sticker"):
-        if st.button("🔄 스티커 지우기"):
-            day_data['sticker'] = ""
-            update_day_data(s_year, s_month, s_day, day_data)
-            st.rerun()
+        cal = calendar.monthcalendar(st.session_state.view_year, st.session_state.view_month)
+        for week in cal:
+            cols = st.columns(7)
+            for i, day in enumerate(week):
+                if day != 0:
+                    is_real_today = (st.session_state.view_year == real_today.year and 
+                                     st.session_state.view_month == real_today.month and 
+                                     day == real_today.day)
+                    
+                    day_data = get_day_data(st.session_state.view_year, st.session_state.view_month, day)
+                    sticker = day_data.get("sticker", "")
+                    
+                    tasks = day_data.get("tasks", [])
+                    total_t = len(tasks)
+                    done_t = sum(1 for t in tasks if t["done"])
+                    
+                    prog_str = ""
+                    if total_t > 0:
+                        if done_t == total_t:
+                            prog_str = "💯"
+                        else:
+                            prog_str = f"({done_t}/{total_t})"
+                    
+                    if is_real_today:
+                        label = f"👑오늘👑\n{day}일\n{sticker} {prog_str}"
+                        btn_type = "primary"
+                    else:
+                        marker = "📍" if day == st.session_state.selected_day else ""
+                        label = f"{marker} {day} \n{sticker}\n{prog_str}"
+                        btn_type = "secondary"
+                    
+                    if cols[i].button(label, key=f"day_{day}", type=btn_type, use_container_width=True):
+                        st.session_state.selected_day = day
+                        st.rerun()
+
+    # [오른쪽] 상세 미션 관리 영역
+    with col_tasks:
+        s_year = st.session_state.view_year
+        s_month = st.session_state.view_month
+        s_day = st.session_state.selected_day
+        day_date = datetime.date(s_year, s_month, s_day)
+        wd_idx = day_date.weekday()
+        
+        # 💡 요일에 따른 타이틀 출력
+        day_type = "🇺🇸 영어+탐구 찢기"
+        if wd_idx == 0: day_type = "🍯 서하의 힐링 먼데이"
+        elif wd_idx in [1, 3, 5]: day_type = "📐 수학+국어 깊이파기"
+        
+        st.markdown(f"<h3 style='color:#db2777;'>💖 {s_day}일 미션: <span style='font-size:18px;'>{day_type}</span></h3>", unsafe_allow_html=True)
+        
+        day_data = get_day_data(s_year, s_month, s_day)
+        tasks = day_data.get("tasks", [])
+        
+        if not tasks:
+            st.info("등록된 일정이 없어! 아래에서 추가해 봐 ✏️")
+        else:
+            for idx, task in enumerate(tasks):
+                col_cb, col_del = st.columns([6, 1])
+                with col_cb:
+                    new_status = st.checkbox(task['text'], value=task['done'], key=f"task_{s_month}_{s_day}_{idx}")
+                    if new_status != task['done']:
+                        day_data['tasks'][idx]['done'] = new_status
+                        update_day_data(s_year, s_month, s_day, day_data)
+                        st.rerun()
+                with col_del:
+                    if st.button("🗑️", key=f"del_{s_month}_{s_day}_{idx}"):
+                        day_data['tasks'].pop(idx)
+                        update_day_data(s_year, s_month, s_day, day_data)
+                        st.rerun()
+                        
+        st.write("---")
+        with st.form(key=f"add_task_form_{s_day}", clear_on_submit=True):
+            new_task_text = st.text_input("새로운 미션 추가...")
+            submitted = st.form_submit_button("➕ 추가하기")
+            if submitted and new_task_text.strip():
+                new_task = {"id": len(tasks)+1, "text": new_task_text.strip(), "done": False}
+                day_data['tasks'].append(new_task)
+                update_day_data(s_year, s_month, s_day, day_data)
+                st.rerun()
+
+        st.markdown("---")
+        st.markdown("**🎀 오늘 기분 스티커**")
+        emoji_cols = st.columns(6)
+        emojis = ['🌸', '🔥', '🔋', '🫠', '👑', '💖']
+        for i, emoji in enumerate(emojis):
+            if emoji_cols[i].button(emoji, key=f"emoji_{s_day}_{emoji}"):
+                day_data['sticker'] = emoji
+                update_day_data(s_year, s_month, s_day, day_data)
+                st.rerun()
+                
+        if day_data.get("sticker"):
+            if st.button("🔄 스티커 지우기"):
+                day_data['sticker'] = ""
+                update_day_data(s_year, s_month, s_day, day_data)
+                st.rerun()
+
+        total_t = len(tasks)
+        done_t = sum(1 for t in tasks if t["done"])
+        progress = int((done_t / total_t) * 100) if total_t > 0 else 0
+        st.write(f"**오늘의 달성률 {progress}%**")
+        st.progress(progress)
 
 with tab2:
     st.subheader("성적 수직 상승 명문대 선배의 팩트폭격 👩‍🏫")
@@ -280,10 +352,11 @@ with tab2:
         with st.expander(f"📌 {tip['title']}"):
             st.write(tip['content'])
 
+# --- 💌 하단 고정 편지 ---
 st.markdown(f"""
 <div class="letter-box">
     <span style="background-color: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">
-        💖 오늘 서하에게 도착한 편지 ({today.month}/{today.day})
+        💖 오늘 서하에게 도착한 편지 ({real_today.month}/{real_today.day})
     </span>
     <p style="margin-top: 15px; font-size: 16px; font-weight: bold; line-height: 1.5;">"{today_letter}"</p>
 </div>
